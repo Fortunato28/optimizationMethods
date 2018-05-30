@@ -4,8 +4,21 @@ oneDimensional::oneDimensional()
 {
     std::cout << "Enter your one-demensional function: " << std::endl;
     getline(std::cin, entered_function, '\n');
-    if(oneDimensional::entered_function.empty())
-        oneDimensional::entered_function = "9(x-6)^2+21";
+    if(entered_function.empty())
+        entered_function = "9(x-6)^2+21";
+
+    dichotomyIterationsNumber   = 0;
+    goldenIterationsNumber      = 0;
+    fibonacciIterationsNumber   = 0;
+}
+
+oneDimensional::oneDimensional(std::string input)
+{
+    dichotomyIterationsNumber   = 0;
+    goldenIterationsNumber      = 0;
+    fibonacciIterationsNumber   = 0;
+
+    oneDimensional::entered_function = input;
 }
 
 double oneDimensional::myFunction(double x)
@@ -22,7 +35,7 @@ double oneDimensional::myFunction(double x)
     expression.register_symbol_table(symbol_table);
 
     parser_t parser;
-    parser.compile(oneDimensional::entered_function, expression);
+    parser.compile(entered_function, expression);
     return expression.value();
 }
 
@@ -38,13 +51,14 @@ void oneDimensional::goldenSection(double a, double b)
     if(delta < epsilon)
     {
         goldenMinimum = (a + b) / 2;
-        goldenMinimumResult();
+        iterationsNumber = goldenIterationsNumber;
         return;
     }
+    ++goldenIterationsNumber;        // Следующая итерация
 
     myFunction(xAlpha) < myFunction(xBetta) ?
-                oneDimensional::goldenSection(xBetta, b) :
-                oneDimensional::goldenSection(a, xAlpha);
+                goldenSection(xBetta, b) :
+                goldenSection(a, xAlpha);
 }
 
 void oneDimensional::dichotomy(double a, double b)
@@ -59,56 +73,71 @@ void oneDimensional::dichotomy(double a, double b)
     if(delta < epsilon)
     {
         dichotomyMinimum = (a + b) / 2;
-        dichotomyMinimumResult();
+        iterationsNumber = dichotomyIterationsNumber;
         return;
     }
+    ++dichotomyIterationsNumber;    // Увеличение счётчика итераций
 
     myFunction(x1) < myFunction(x2) ?
-                oneDimensional::dichotomy(a, x2) :
-                oneDimensional::dichotomy(x1, b);
+                dichotomy(a, x2) :
+                dichotomy(x1, b);
+}
+
+std::vector<double> oneDimensional::getFibonacciNumber(size_t N)
+{
+    std::vector<double> fibonacciNumber = {1, 1};
+    for(size_t i = 1; fibonacciNumber.back() <= N; ++i)
+    {
+        fibonacciNumber.push_back(fibonacciNumber.at(i - 1) + fibonacciNumber.back());
+    }
+
+    return fibonacciNumber;
 }
 
 void oneDimensional::fibonacci(double a, double b)
 {
     double delta = fabs(b - a);     // Интервал неопределённости
-    size_t n = 10;                  // Количество итераций
-    std::vector<double> fibonacciNumber = {1, 1, 2, 3, 5, 8, 13,
-                                           21, 34, 55, 89, 144};
-    static size_t i = 0;            // Номер текущей итерации и её приращение
-    ++i;
-    double x1 = a + (fibonacciNumber.at(n - i - 1) / fibonacciNumber.at(n - i + 1)) * delta;
-    double x2 = a + (fibonacciNumber.at(n - i) / fibonacciNumber.at(n - i + 1)) * delta;
+    const double epsilon = 0.001;
+    static size_t N_fib = delta / epsilon;
+    static std::vector<double> fibonacciNumber = getFibonacciNumber(N_fib);
+    size_t N = fibonacciNumber.size() - 2;
+    size_t n = fibonacciIterationsNumber;
+    double x1 = a + (fibonacciNumber.at(N - n - 1) / fibonacciNumber.at(N - n + 1)) * delta;
+    double x2 = a + (fibonacciNumber.at(N - n) / fibonacciNumber.at(N - n + 1)) * delta;
 
     // Условие останова, вывод результата
-    if(i == (n - 1))
+    if(n == (N - 1))
     {
         fibonacciMinimum = (a + b) / 2;
-        fibonacciMinimumResult();
+        iterationsNumber = fibonacciIterationsNumber;
         return;
     }
+    ++fibonacciIterationsNumber;                            // Увеличение счётчика итераций
 
     myFunction(x1) < myFunction(x2) ?
-                oneDimensional::fibonacci(a, x2) :
-                oneDimensional::fibonacci(x1, b);
+                fibonacci(a, x2) :
+                fibonacci(x1, b);
 }
 
-void oneDimensional::goldenMinimumResult()
+void oneDimensional::getResult(std::string method, double minimumPoint)
 {
-    std::cout << "Result of the golden section method:" << std::endl;
-    std::cout << "x = " << oneDimensional::goldenMinimum << std::endl;
-    std::cout << "f(x) = "<<oneDimensional::myFunction(goldenMinimum) << std::endl;
+    std::cout << "Result of the " << method << ":" << std::endl;
+    std::cout << "x = " << minimumPoint << std::endl;
+    std::cout << "f(x) = "<< myFunction(minimumPoint) << std::endl;
+    std::cout << "Number of iterations = " << iterationsNumber << std::endl;
 }
 
-void oneDimensional::dichotomyMinimumResult()
+double oneDimensional::getGoldenMinimum()
 {
-    std::cout << "Result of the dichotomy:" << std::endl;
-    std::cout << "x = " << oneDimensional::dichotomyMinimum << std::endl;
-    std::cout << "f(x) = "<<oneDimensional::myFunction(dichotomyMinimum) << std::endl;
+    return this->goldenMinimum;
 }
 
-void oneDimensional::fibonacciMinimumResult()
+double oneDimensional::getDichotomyMinimum()
 {
-    std::cout << "Result of the Fibonacci method:" << std::endl;
-    std::cout << "x = " << oneDimensional::fibonacciMinimum << std::endl;
-    std::cout << "f(x) = "<<oneDimensional::myFunction(fibonacciMinimum) << std::endl;
+    return this->dichotomyMinimum;
+}
+
+double oneDimensional::getFibonacciMinimum()
+{
+    return this->fibonacciMinimum;
 }

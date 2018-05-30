@@ -15,21 +15,30 @@ class oneDimensional
 {
 public:
     oneDimensional();
-    void goldenSection(double, double);         // Параметрами являются точки-края интервала поиска минимума
-    void dichotomy(double, double);             // Параметрами являются точки-края интервала поиска минимума
-    void fibonacci(double, double);
+    oneDimensional(std::string);
+    void    goldenSection(double, double);         // Параметрами являются точки-края интервала поиска минимума
+    void    dichotomy(double, double);             // Параметрами являются точки-края интервала поиска минимума
+    void    fibonacci(double, double);
+
+    void    getResult(std::string, double);        // Вывод результата метода
+    double  getGoldenMinimum();
+    double  getDichotomyMinimum();
+    double  getFibonacciMinimum();
 private:
+    size_t iterationsNumber;                    // Количество итераций последнего отработавшего метода
+
     std::string entered_function;               // Введёная функция
     double myFunction(double);                  // Обработка введённой функции
 
     double goldenMinimum;                       // Результат золотого сечения
-    void goldenMinimumResult();                 // Отображение результата золотого сечения
+    size_t goldenIterationsNumber;
 
     double dichotomyMinimum;                    // Результат дихотомии
-    void dichotomyMinimumResult();              // Отображение результата дихотомии
+    size_t dichotomyIterationsNumber;
 
     double fibonacciMinimum;                    // Результат метода Фибоначчи
-    void fibonacciMinimumResult();              // Отображение результата метода Фибоначчи
+    size_t fibonacciIterationsNumber;
+    std::vector<double> getFibonacciNumber(size_t);               // Вычисление количества итераций для метода Фибоначчи
 };
 
 #endif // oneDimensional_H
